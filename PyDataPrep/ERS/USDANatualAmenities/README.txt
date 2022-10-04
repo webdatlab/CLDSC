@@ -1,0 +1,1 @@
+https://www.ers.usda.gov/data-products/natural-amenities-scale.aspx

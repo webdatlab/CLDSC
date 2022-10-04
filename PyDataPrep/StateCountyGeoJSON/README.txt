@@ -1,0 +1,1 @@
+https://gist.githubusercontent.com/jyaganeh/4301986/raw/b6f62f86866890d3a30d55154e9e0277369f6728/us-counties.json
