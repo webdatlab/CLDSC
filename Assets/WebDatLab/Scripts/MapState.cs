@@ -16,7 +16,7 @@ public class MapState : MonoBehaviour
     public float cameraDistanceThreshold = 30.0f;
     public Material originalMAT;
     public bool disabled = false;
-    
+    public MeshFilter meshFilter;
 
     void OnMouseEnter()
     {
@@ -79,7 +79,15 @@ public class MapState : MonoBehaviour
     {
         manager = Manager.GetCurrentManager();
         originalScale = transform.localScale;
-        GetComponent<Renderer>().material.SetColor("_Color", (GetComponent<Renderer>().material.GetColor("_Color") *0.75f) + (Random.ColorHSV() * 0.25f));
+        meshFilter = GetComponent<MeshFilter>();
+        Color initialColor = manager.initialMapColors[Random.Range(0, manager.initialMapColors.Count)];
+        Color[] newColors = new Color[meshFilter.sharedMesh.vertices.Length];
+        for (int vertexIndex = 0; vertexIndex < newColors.Length; vertexIndex++)
+        {
+            newColors[vertexIndex] = initialColor;
+
+        }
+        meshFilter.sharedMesh.colors = newColors;
         originalMAT = GetComponent<Renderer>().material;
     }
 

@@ -30,9 +30,15 @@ public class Manager : MonoBehaviour
     public HoverInfo countyHoverInfo;
     public TMPro.TextMeshProUGUI countySearchTMPro;
     public TMPro.TextMeshPro countyNameTMPro;
+    public Transform fieldSelectionPanel;
+    public Transform fieldTogglePrefab;
+    public bool useCustomFields = false;
 
+    public List<MapCounty> mapCounties;
     public List<Texture2D> stateFlags;
     public RawImage hoverInfoFlag;
+    public Transform countySearchResultPrefab;
+    public List<Transform> countySearchResults;
 
     public float zoomMapSwitch = 40.0f;
     public float minZoom = 30.0f;
@@ -47,6 +53,7 @@ public class Manager : MonoBehaviour
     public bool mapMode = true;
     public Gradient percentageGradient;
     public Scrollbar compareScrollBar;
+    public List<Color> initialMapColors;
 
     // ---------------- CHART MANAGEMENT ----------------
     public Camera chartCamera;
@@ -55,7 +62,8 @@ public class Manager : MonoBehaviour
     public Transform chartSpawnOrigin;
     public Transform chartSpawnParent;
     public float chartSpawnLength = 30.0f;
-    public Transform employmentTypePieChart; // employment types always add up to 100 per county, use this to create pie chart
+    public List<TMPro.TextMeshProUGUI> chartFieldTitles;
+    public Transform employmentTypeieChart; // employment types always add up to 100 per county, use this to create pie chart
     
     public class ChartField
     {
@@ -95,17 +103,22 @@ public class Manager : MonoBehaviour
     {
         NONE,
         PERCENT,
-        COUNT
+        COUNT,
+        CHANGE,
     }    
 
     [System.Serializable]
     public class CountyField
     {
         public string name = "FieldName";
+        public string description = "Field Description";
         public CountyFieldType type = CountyFieldType.NONE;
         public bool positiveContext = true;
         public float value = -1.0f;
+        public Toggle fieldToggle;
+        public bool selected = false;
     }
+    public List<CountyField> countyFields;
 
     [System.Serializable]
     public class CountyData
@@ -196,8 +209,49 @@ public class Manager : MonoBehaviour
         return null;
     }
 
+    public CountyData GetCountyData(int fips)
+    {
+        for (int i = 0; i < countyData.Length; i++)
+        {
+            if (countyData[i].fips == fips)
+            {
+                return countyData[i];
+            }
+        }
+        return null;
+    }
+
+    public int GetCountyFipsFromName(string name)
+    {
+        return int.Parse(name.Replace("_", ""));
+    }
+
     public void SearchCounties()
     {
+        for(int i = 0; i < countySearchResults.Count; i++)
+        {
+            Destroy(countySearchResults[i].gameObject);
+        }
+        countySearchResults.Clear();
+
+        string county = countySearchTMPro.text.Trim().ToLower();
+        string countySearch = System.Text.Encoding.ASCII.GetString(System.Text.Encoding.ASCII.GetBytes(county)).Replace("?", "");
+        if(countySearch.Length <= 3) { return; }
+        for (int i = 0; i < mapCounties.Count; i++)
+        {
+            string mapCounty = countyData[mapCounties[i].countyDataIndex].name.ToLower();
+            string mapCountyAscii = System.Text.Encoding.ASCII.GetString(System.Text.Encoding.ASCII.GetBytes(mapCounty));
+
+            if (mapCountyAscii.Contains(countySearch))
+            {
+                Vector3 pos = new Vector3(mapCounties[i].GetWorldSpaceFromMesh().x, countyNameTMPro.transform.position.y, mapCounties[i].GetWorldSpaceFromMesh().z);
+                Transform newSearchResult = Instantiate(countySearchResultPrefab, pos, countyNameTMPro.transform.rotation) as Transform;
+                newSearchResult.parent = mapBase;
+                newSearchResult.GetComponent<TMPro.TextMeshPro>().text = countyData[mapCounties[i].countyDataIndex].name + ", " + countyData[mapCounties[i].countyDataIndex].state;
+                countySearchResults.Add(newSearchResult);
+            }
+        }  
+
         /*System.Text.Encoding ascii = System.Text.Encoding.ASCII;
         string county = countySearchTMPro.text.Trim().ToLower();
         for(int i = 0; i < countyData.Length; i++)
@@ -289,6 +343,22 @@ public class Manager : MonoBehaviour
 
         float spawnLength = chartSpawnLength * (1f / (float)compareList.Count);
 
+        if(useCustomFields)
+        {
+            List<string> selectedFields = GetSelectedFields();
+            for (int i = 0; i < 5; i++)
+            {
+                if (selectedFields.Count > i)
+                {
+                    chartFieldTitles[i].text = selectedFields[i];
+                } 
+                else
+                {
+                    chartFieldTitles[i].text = "";
+                }
+            }
+        }
+
         // Generate charts
         for (int i = 0; i < compareList.Count; i++)
         {
@@ -357,13 +427,164 @@ public class Manager : MonoBehaviour
     {
         for(int i = 0; i < brokenOnWebGL.Count; i++)
         {
-            //brokenOnWebGL[i].gameObject.SetActive(false);
+            brokenOnWebGL[i].gameObject.SetActive(false);
         }
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         stateHoverInfo.gameObject.SetActive(false);
         countyHoverInfo.gameObject.SetActive(false);
+        fieldSelectionPanel.gameObject.SetActive(false);
         SwitchToMapMode();
+
+        // Build field selection panel
+        for(int i = 0; i < countyFields.Count; i++)
+        {
+            Transform newFieldToggle = Instantiate(fieldTogglePrefab, Vector3.zero, Quaternion.identity) as Transform;
+            newFieldToggle.parent = fieldSelectionPanel;
+            newFieldToggle.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = countyFields[i].name;
+            newFieldToggle.transform.localScale = Vector3.one;
+            countyFields[i].fieldToggle = newFieldToggle.GetComponent<Toggle>();
+        }
+
+        mapCounties = new List<MapCounty>(GameObject.FindObjectsOfType<MapCounty>());
+    }
+
+    
+
+    public void ShowFieldSelectionPanel()
+    {
+        fieldSelectionPanel.gameObject.SetActive(true);
+    }
+
+    public void HideFieldSelectionPanel()
+    {
+        fieldSelectionPanel.gameObject.SetActive(false);
+    }
+
+    public void ToggleFieldSelectionPanel()
+    {
+        fieldSelectionPanel.gameObject.SetActive(!fieldSelectionPanel.gameObject.activeInHierarchy);
+    }
+
+    public List<string> GetSelectedFields()
+    {
+        List<string> selectedFields = new List<string>();
+        for (int i = 0; i < countyFields.Count; i++)
+        {
+            if(countyFields[i].fieldToggle.isOn)
+            {
+                selectedFields.Add(countyFields[i].name);
+            }
+        }
+        return selectedFields;
+    }
+
+    public float GetCountyPercentFromFieldName(int FIPS, string name)
+    {
+        CountyData cd = GetCountyData(FIPS);
+        if(cd == null) { return 0.0f; }
+        if (name == "percentWaterArea") { return cd.percentWaterArea; }
+        if (name == "agricultureEmploymentPercent") { return cd.agricultureEmploymentPercent; }
+        if (name == "animalUnitsPerAcrePercent") { return cd.animalUnitsPerAcrePercent; }
+        if (name == "athsmaDiagnosisPercent") { return cd.athsmaDiagnosisPercent; }
+        if (name == "bachelorsDegreePercent") { return cd.bachelorsDegreePercent; }
+        if (name == "bingeDrinkingPercent") { return cd.bingeDrinkingPercent; }
+        if (name == "cancerDiagnosisPercent") { return cd.cancerDiagnosisPercent; }
+        if (name == "chemicalDiseaseControlAcresPercent") { return cd.chemicalDiseaseControlAcresPercent; }
+        if (name == "chemicallyDefoliatedAcresPercent") { return cd.chemicallyDefoliatedAcresPercent; }
+        if (name == "chemicalNematodeControlAcresPercent") { return cd.chemicalNematodeControlAcresPercent; }
+        if (name == "childPovertyPercent") { return cd.childPovertyPercent; }
+        if (name == "constructionEmploymentPercent") { return cd.constructionEmploymentPercent; }
+        if (name == "percentWaterdepressionPercentArea") { return cd.depressionPercent; }
+        if (name == "extremeDroughtPercent") { return cd.extremeDroughtPercent; }
+        if (name == "fireEmploymentPercent") { return cd.fireEmploymentPercent; }
+        if (name == "governmentEmploymentPercent") { return cd.governmentEmploymentPercent; }
+        if (name == "harvestedAcresPercent") { return cd.harvestedAcresPercent; }
+        if (name == "immigrantPercent") { return cd.immigrantPercent; }
+        if (name == "informationEmploymentPercent") { return cd.informationEmploymentPercent; }
+        if (name == "irrigatedAcresPercent") { return cd.irrigatedAcresPercent; }
+        if (name == "manufacturingEmploymentPercent") { return cd.manufacturingEmploymentPercent; }
+        if (name == "manureAcresPercent") { return cd.manureAcresPercent; }
+        if (name == "noHealthInsurancePercent") { return cd.noHealthInsurancePercent; }
+        if (name == "noHSDiplomaPercent") { return cd.noHSDiplomaPercent; }
+        if (name == "noLeisureTimePercent") { return cd.noLeisureTimePercent; }
+        if (name == "obesityPercent") { return cd.obesityPercent; }
+        if (name == "onlyHSDiplomaPercent") { return cd.onlyHSDiplomaPercent; }
+        if (name == "ownHomePercent") { return cd.ownHomePercent; }
+        if (name == "poorMentalHealthPercent") { return cd.poorMentalHealthPercent; }
+        if (name == "povertyPercent") { return cd.povertyPercent; }
+        if (name == "publicTransitPercent") { return cd.publicTransitPercent; }
+        if (name == "serviceEmploymentPercent") { return cd.serviceEmploymentPercent; }
+        if (name == "smokerPercent") { return cd.smokerPercent; }
+        if (name == "someCollegePercent") { return cd.someCollegePercent; }
+        if (name == "strokePercent") { return cd.strokePercent; }
+        if (name == "tradeEmploymentPercent") { return cd.tradeEmploymentPercent; }
+        if (name == "transportationEmploymentPercent") { return cd.transportationEmploymentPercent; }
+        if (name == "unemploymentPercent") { return cd.unemploymentPercent; }
+        if (name == "veteransInPovertyPercent") { return cd.veteransInPovertyPercent; }
+        if (name == "veteransUnemploymentPercent") { return cd.veteransUnemploymentPercent; }
+        return 0.0f;
+    }
+
+    public Color GetCountyColorForSelectedFields(int FIPS)
+    {
+        List<float> percents = new List<float>();
+        for (int i = 0; i < countyFields.Count; i++)
+        {
+            if (countyFields[i].fieldToggle.isOn)
+            {
+                if (countyFields[i].type == CountyFieldType.PERCENT)
+                {
+                    if (countyFields[i].positiveContext)
+                    {
+                        percents.Add(GetCountyPercentFromFieldName(FIPS, countyFields[i].name));
+                    }
+                    else
+                    {
+                        percents.Add(100.0f - GetCountyPercentFromFieldName(FIPS, countyFields[i].name));
+                    }
+                }
+            }
+        }
+
+        float avgPercent = 0.0f;
+        for(int i = 0; i < percents.Count; i++)
+        {
+            avgPercent += percents[i];
+        }
+        avgPercent = avgPercent * (1.0f / percents.Count);
+
+        if(avgPercent <= 0.0f || avgPercent > 100.0f || avgPercent == float.NaN)
+        {
+            return initialMapColors[Random.Range(0, initialMapColors.Count)];
+        }
+        else 
+        {
+            return percentageGradient.Evaluate(Mathf.Clamp(avgPercent * 0.01f, 0.0f, 1.0f));
+        }
+    }
+    
+    public void HandleFieldToggle()
+    {
+        // Loop through fields, set county/state colors based on values for selection 
+        List<string> selectedFields = GetSelectedFields();
+
+        if(selectedFields.Count == 0)
+        {
+            for (int i = 0; i < mapCounties.Count; i++)
+            {
+                mapCounties[i].ResetCountyMeshColor();
+            }
+            useCustomFields = false;
+        }
+        else 
+        {
+            for (int i = 0; i < mapCounties.Count; i++)
+            {
+                mapCounties[i].SetCountyMeshColor(GetCountyColorForSelectedFields(GetCountyFipsFromName(mapCounties[i].gameObject.name)));
+            }
+            useCustomFields = true;
+        }
     }
 
     public void SetHoverFlag(string name)

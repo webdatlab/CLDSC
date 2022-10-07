@@ -22,5 +22,4 @@ public class ChartBar : MonoBehaviour
     {
         displayTextOriginalScale = displayText.localScale;    
     }
-
 }

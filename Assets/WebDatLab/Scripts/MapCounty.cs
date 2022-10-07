@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 public class MapCounty : MonoBehaviour
 {
     public Manager manager;
+    public int FIPS = -1;
     public Vector3 originalScale = Vector3.one;
     public float hoverHeightMod = 1.5f;
     public float cameraDistanceCheckTimer = 0.0f;
@@ -17,6 +18,7 @@ public class MapCounty : MonoBehaviour
     //public Manager.CountyData countyData;
     public int countyDataIndex;
     public MeshFilter meshFilter;
+    public Vector3 meshPosition;
 
     public string formatCountyPercentage(float percentage, bool reverse = false)
     {
@@ -40,6 +42,10 @@ public class MapCounty : MonoBehaviour
 
     public Vector3 GetWorldSpaceFromMesh()
     {
+        if(meshFilter.mesh.vertices.Length == 0)
+        {
+            return Vector3.zero;
+        }
         return transform.TransformPoint(meshFilter.mesh.vertices[0]);
     }
 
@@ -142,9 +148,32 @@ public class MapCounty : MonoBehaviour
         GetComponent<Renderer>().enabled = false;
         originalPosition = transform.localPosition;
         originalScale = transform.localScale;
-        // THIS HURTS PERFORMANCE - need to change to a set of 12 materials that are randomly chosen so batching will work 
-        GetComponent<Renderer>().material.SetColor("_Color", (GetComponent<Renderer>().material.GetColor("_Color") * 0.75f) + (Random.ColorHSV() * 0.25f));
         meshFilter = GetComponent<MeshFilter>();
+        meshPosition = GetWorldSpaceFromMesh();
+        ResetCountyMeshColor();
+    }
+
+    public void ResetCountyMeshColor()
+    {
+        Color initialColor = manager.initialMapColors[Random.Range(0, manager.initialMapColors.Count)];
+        Color[] newColors = new Color[meshFilter.sharedMesh.vertices.Length];
+        for (int vertexIndex = 0; vertexIndex < newColors.Length; vertexIndex++)
+        {
+            newColors[vertexIndex] = initialColor;
+
+        }
+        meshFilter.sharedMesh.colors = newColors;
+    }
+
+    public void SetCountyMeshColor(Color color)
+    {
+        Color[] newColors = new Color[meshFilter.sharedMesh.vertices.Length];
+        for (int vertexIndex = 0; vertexIndex < newColors.Length; vertexIndex++)
+        {
+            newColors[vertexIndex] = color;
+
+        }
+        meshFilter.sharedMesh.colors = newColors;
     }
 
     // Update is called once per frame

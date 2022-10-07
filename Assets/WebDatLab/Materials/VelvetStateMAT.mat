@@ -8,14 +8,15 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: VelvetStateMAT
-  m_Shader: {fileID: 4800000, guid: 20e6179602f8d494788fde38f4dbc100, type: 3}
+  m_Shader: {fileID: 4800000, guid: 3ad133cf538735c4f9f6d036a80a239e, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap: {}
+  stringTagMap:
+    RenderType: Opaque
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
@@ -30,8 +31,18 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Albedo: 3.28
+    - _Alpha: 1
+    - _DstBlend: 0
+    - _Emission: 0
+    - _Metallic: 0
+    - _Mode: 0
     - _RimPower: 0.2
+    - _Smoothness: 0.802
+    - _SrcBlend: 1
+    - _ZWrite: 1
     m_Colors:
     - _Color: {r: 0, g: 0.8323951, b: 1, a: 1}
+    - _EmissionColor: {r: 255, g: 255, b: 255, a: 255}
     - _RimColor: {r: 0.36234283, g: 0, b: 1, a: 1}
   m_BuildTextureStacks: []

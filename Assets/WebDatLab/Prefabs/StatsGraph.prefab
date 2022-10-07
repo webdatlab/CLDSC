@@ -1042,7 +1042,7 @@ RectTransform:
   m_GameObject: {fileID: 1847339930}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 1.54}
-  m_LocalScale: {x: 0.7468224, y: 0.059596185, z: 0.3734112}
+  m_LocalScale: {x: 0.6940146, y: 0.05538214, z: 0.3470073}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3624840709196630590}
@@ -1051,7 +1051,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 2.86, y: -0.16}
-  m_SizeDelta: {x: 16.85, y: 5}
+  m_SizeDelta: {x: 14.28, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &1847339933
 MeshRenderer:
@@ -1142,7 +1142,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 22.25
+  m_fontSize: 18.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1308,6 +1308,25 @@ MonoBehaviour:
     smokerPercent: 0
   manager: {fileID: 0}
   chartTitle: {fileID: 1847339932}
+  customStatsGraph: 0
+  customChartData:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  customChartBars:
+  - {fileID: 3403737737741184827}
+  - {fileID: 6718000790157690220}
+  - {fileID: 4642060205395168365}
+  - {fileID: 7704159586662527142}
+  - {fileID: 3316831846781941589}
+  customChartValueTMPros:
+  - {fileID: 1571409058}
+  - {fileID: 1773475986}
+  - {fileID: 683603325}
+  - {fileID: 1731043}
+  - {fileID: 778262889}
   chartBar01: {fileID: 3403737737741184827}
   chartBar02: {fileID: 6718000790157690220}
   chartBar03: {fileID: 4642060205395168365}
@@ -1323,6 +1342,8 @@ MonoBehaviour:
   chartValueTMPro03: {fileID: 683603325}
   chartValueTMPro04: {fileID: 1731043}
   chartValueTMPro05: {fileID: 778262889}
+  chartBarPrefab: {fileID: 0}
+  chartTextPrefab: {fileID: 0}
   maxBarScale: 3.7
 --- !u!1001 &3774835820725776442
 PrefabInstance:

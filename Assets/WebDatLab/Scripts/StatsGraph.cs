@@ -8,6 +8,11 @@ public class StatsGraph : MonoBehaviour
     public Manager.CountyData chartData;
     public Manager manager;
     public TMPro.TextMeshPro chartTitle;
+    public bool customStatsGraph = false;
+
+    public List<float> customChartData = new List<float>(5);
+    public List<Transform> customChartBars;
+    public List<TMPro.TextMeshPro> customChartValueTMPros;
 
     public Transform chartBar01;
     public Transform chartBar02;
@@ -26,6 +31,16 @@ public class StatsGraph : MonoBehaviour
     public TMPro.TextMeshPro chartValueTMPro03;
     public TMPro.TextMeshPro chartValueTMPro04;
     public TMPro.TextMeshPro chartValueTMPro05;
+
+    [System.Serializable]
+    public class CustomChartBar
+    {
+        public Transform chartBar;
+        public Transform chartTextPoint;
+        public TMPro.TextMeshPro chartValueTMPro;
+    }
+    public Transform chartBarPrefab;
+    public Transform chartTextPrefab;
 
     /*public float textScaleHoverMod = 2.0f;
     public Vector3 chartValueOriginalScale01;
@@ -52,6 +67,69 @@ public class StatsGraph : MonoBehaviour
     void Start()
     {
         if (manager == null) { manager = Manager.GetCurrentManager(); }
+
+        if(manager.useCustomFields)
+        {
+            List<string> selectedFields = manager.GetSelectedFields();
+
+            for (int i = 0; i < countyDataIDs.Count; i++)
+            {
+                if (i == 0)
+                {
+                    chartData = manager.countyData[countyDataIDs[i]];
+
+                    for (int j = 0; j < 5; j++)
+                    {
+                        if (selectedFields.Count > j)
+                        {
+                            try
+                            {
+                                customChartData[j] = manager.GetCountyPercentFromFieldName(countyDataIDs[i], selectedFields[j]);
+                            }
+                            catch (System.Exception ex)
+                            {
+                                customChartData[j] = 0.0f;
+                            }
+                        } 
+                        else
+                        {
+                            customChartData[j] = 0.0f;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < 5; j++)
+                    {
+                        if (selectedFields.Count > j)
+                        {
+                            customChartData[j] += manager.GetCountyPercentFromFieldName(countyDataIDs[i], selectedFields[j]);
+                        }
+                    }
+                }
+            }
+
+            for (int j = 0; j < 5; j++)
+            {
+                if (selectedFields.Count > j)
+                {
+                    customChartData[j] *= (1f / (float)countyDataIDs.Count);
+                    customChartBars[j].localScale = new Vector3(customChartBars[j].localScale.x, FixNaN(customChartData[j] * 0.01f) * maxBarScale, customChartBars[j].localScale.z);
+                    customChartValueTMPros[j].text = customChartData[j].ToString("0.0") + "%";
+                    customChartValueTMPros[j].transform.position = customChartBars[j].Find("barTop").position;
+                }
+                else
+                {
+                    customChartBars[j].gameObject.SetActive(false);
+                    customChartValueTMPros[j].gameObject.SetActive(false);
+                }
+            }
+
+            return;
+        }
+
+
+
         for(int i = 0; i < countyDataIDs.Count; i++)
         {
             if(i == 0)
