@@ -84,16 +84,16 @@ public class StatsGraph : MonoBehaviour
                         {
                             try
                             {
-                                customChartData[j] = manager.GetCountyPercentFromFieldName(countyDataIDs[i], selectedFields[j]);
+                                customChartData[j] = manager.GetCountyPercentFromFieldName(manager.countyData[countyDataIDs[i]].fips, selectedFields[j]);
                             }
                             catch (System.Exception ex)
                             {
-                                customChartData[j] = 0.0f;
+                                //customChartData[j] = 0.0f;
                             }
                         } 
                         else
                         {
-                            customChartData[j] = 0.0f;
+                            //customChartData[j] = 0.0f;
                         }
                     }
                 }
@@ -103,7 +103,7 @@ public class StatsGraph : MonoBehaviour
                     {
                         if (selectedFields.Count > j)
                         {
-                            customChartData[j] += manager.GetCountyPercentFromFieldName(countyDataIDs[i], selectedFields[j]);
+                            customChartData[j] += manager.GetCountyPercentFromFieldName(manager.countyData[countyDataIDs[i]].fips, selectedFields[j]);
                         }
                     }
                 }

@@ -4,9 +4,12 @@ using UnityEngine;
 using UnityEditor;
 using System;
 
+
+
+#if !UNITY_WEBGL
 public class UVCS_StandardShaderGUI : ShaderGUI
 {
-        public enum BlendMode
+    public enum BlendMode
         {
             Opaque,
             Fade,   
@@ -184,4 +187,6 @@ public class UVCS_StandardShaderGUI : ShaderGUI
                 m.DisableKeyword(keyword);
         }
     }
+}
 
+#endif

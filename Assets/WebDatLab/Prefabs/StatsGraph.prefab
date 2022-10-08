@@ -1316,17 +1316,17 @@ MonoBehaviour:
   - 0
   - 0
   customChartBars:
-  - {fileID: 3403737737741184827}
-  - {fileID: 6718000790157690220}
-  - {fileID: 4642060205395168365}
-  - {fileID: 7704159586662527142}
   - {fileID: 3316831846781941589}
+  - {fileID: 7704159586662527142}
+  - {fileID: 4642060205395168365}
+  - {fileID: 6718000790157690220}
+  - {fileID: 3403737737741184827}
   customChartValueTMPros:
-  - {fileID: 1571409058}
-  - {fileID: 1773475986}
-  - {fileID: 683603325}
-  - {fileID: 1731043}
   - {fileID: 778262889}
+  - {fileID: 1731043}
+  - {fileID: 683603325}
+  - {fileID: 1773475986}
+  - {fileID: 1571409058}
   chartBar01: {fileID: 3403737737741184827}
   chartBar02: {fileID: 6718000790157690220}
   chartBar03: {fileID: 4642060205395168365}
